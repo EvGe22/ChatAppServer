@@ -130,6 +130,20 @@ class Connection{
 
     }
 
+    public void sendContacts(String contacts){
+        try {
+            out.write(new StringBuilder(Protocol.CONTACTS).append(contacts).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.CONTACTS;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return socket.equals(((Connection) obj).socket);
+    }
+
     public Command recieve(){
         return  Command.getCommand(in);
     }

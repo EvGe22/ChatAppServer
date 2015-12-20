@@ -10,4 +10,7 @@ public class Protocol {
     public static final String CALL = "Call";
     public static final String LOGIN = "Login ";
     public static final String SIGNUP = "Signup ";
+    public static final String LOGOUT = "Logout";
+    public static final String GET_CONTACTS = "Get Contacts";
+    public static final String CONTACTS = "Contacts";
 }
