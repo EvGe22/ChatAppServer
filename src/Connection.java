@@ -37,47 +37,6 @@ class Connection{
         }
     }
 
-    public void sendLogin(String nick,String password){
-        try {
-            out.write(new StringBuilder(Protocol.LOGIN).append(" ").append(nick).append(" ").append(password.hashCode()).append("\n").toString().getBytes("UTF-8"));
-            lastCommand=CommandType.LOGIN;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendSignUp(String nick,String password){
-        try {
-            out.write(new StringBuilder(Protocol.SIGNUP).append(" ").append(nick).append(" ").append(password.hashCode()).append("\n").toString().getBytes("UTF-8"));
-            lastCommand=CommandType.SIGNUP;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /*public void sendNickHello(String nick){
-        try {
-            out.write(new StringBuilder(Protocol.GREETING).append(nick).append("\n").toString().getBytes("UTF-8"));
-            lastCommand=CommandType.NICK;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-    public void sendNickBusy(String nick){
-        try {
-            out.write(new StringBuilder(Protocol.GREETING).append(nick).append(" busy").append("\n").toString().getBytes("UTF-8"));
-            lastCommand=CommandType.NICK;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    */
-
     public void accept(){
         try {
             out.write(new StringBuilder(Protocol.ACCEPTED).append("\n").toString().getBytes("UTF-8"));
@@ -117,17 +76,22 @@ class Connection{
         }
     }
 
-    public void disconnectFromUser(String nick){
+    public void disconnectFromUser(){
         try{
-            out.write(new StringBuilder(Protocol.DISCONNECT_FROM_USER).append(nick).append("\n").toString().getBytes("UTF-8"));
+            out.write(new StringBuilder(Protocol.DISCONNECT_FROM_USER).append("\n").toString().getBytes("UTF-8"));
             lastCommand=CommandType.DISCONNECT_FROM_USER;
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void getContacts(){
-
+    public void sendOffline(){
+        try{
+            out.write(new StringBuilder(Protocol.OFFLINE).append("\n").toString().getBytes("UTF-8"));
+            lastCommand=CommandType.OFFLINE;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void sendContacts(String contacts){
@@ -139,6 +103,33 @@ class Connection{
         lastCommand=CommandType.CONTACTS;
     }
 
+    public void sendEmptyContacts() {
+        try {
+            out.write(new StringBuilder(Protocol.EMPTYCONTACTS).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.EMPTYCONTACTS;
+    }
+
+    public void sendMyContacts(String contacts) {
+        try {
+            out.write(new StringBuilder(Protocol.MY_CONTACTS).append(contacts).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.MY_CONTACTS;
+    }
+
+    public void sendEmptyMyContacts() {
+        try {
+            out.write(new StringBuilder(Protocol.EMPTYMYCONTACTS).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.EMPTYMYCONTACTS;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return socket.equals(((Connection) obj).socket);
@@ -147,4 +138,7 @@ class Connection{
     public Command recieve(){
         return  Command.getCommand(in);
     }
+
+
+
 }

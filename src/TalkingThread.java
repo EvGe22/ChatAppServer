@@ -1,4 +1,9 @@
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 public class TalkingThread extends Thread {
@@ -28,7 +33,8 @@ public class TalkingThread extends Thread {
                             login = loginCommand.getLogin();
                             Main.onlineUsers.put(login, this);
                             System.out.println(login + " logged in");
-                        } else {
+                        }
+                        else {
                             connection.reject();
                         }
                         break;
@@ -51,7 +57,7 @@ public class TalkingThread extends Thread {
                     case DISCONNECT: {
                         connection.disconnect();
                         run = false;
-                        // Disconnecting the other user, if he exists
+                        otherOne.disconnectFromUser();
                         if (Main.onlineUsers.containsKey(login)) Main.onlineUsers.remove(login);
                         if (Main.temporary.contains(this)) Main.temporary.remove(this);
                         System.out.println(login + " disconnected");
@@ -61,21 +67,96 @@ public class TalkingThread extends Thread {
                         System.out.println(login + " logged out");
                         Main.onlineUsers.remove(login);
                         Main.temporary.add(this);
-                        // Disconnecting the other user, if he exists
+                        if (otherOne!=null) {
+                            otherOne.disconnectFromUser();
+                            otherOne = null;
+                        }
                         login=null;
                         break;
                     }
                     case GET_CONTACTS:{
-                        StringBuilder stringBuilder = new StringBuilder();
-                        int i;
-                        for(Map.Entry<String, String> entry: Main.logins.entrySet()){
-                            stringBuilder.append(" ").append(entry.getKey()).append(" ").append(Main.onlineUsers.containsKey(entry.getKey())).append(" ").append(false);
-                        }
-                        System.out.println(stringBuilder.toString());
-                        connection.sendContacts(stringBuilder.toString());
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                GetContactsCommand command = (GetContactsCommand) lastCommand;
+                                StringBuilder stringBuilder = new StringBuilder();
+                                for (Map.Entry<String, String> entry : Main.logins.entrySet())
+                                {
+                                    if (entry.getKey().contains(command.getRegex())) stringBuilder.append(" ")
+                                            .append(entry.getKey()).append(" ").append(Main.onlineUsers.containsKey(entry.getKey()));
+                                }
+                                System.out.println(stringBuilder.toString()); //HEH
+                                connection.sendContacts(stringBuilder.toString());
+                            }
 
-
+                        }.start();
+                        break;
                     }
+                    case GET_MY_CONTACTS:{
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                try {
+                                    Scanner in = new Scanner(new FileReader(login + "Contacts.txt"));
+                                    StringBuilder stringBuilder = new StringBuilder();
+                                    while (in.hasNextLine()) {
+                                        String tmp = in.nextLine();
+                                        String[] tmpArr = tmp.split(" ");
+                                        stringBuilder.append(" ").append(tmp).append(" ").append(Main.onlineUsers.containsKey(tmpArr[0]));
+                                    }
+                                    connection.sendMyContacts(stringBuilder.toString());
+
+
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                    connection.sendEmptyMyContacts();
+                                }
+                            }
+                        }.start();
+                        break;
+                    }
+                    case CONTACTS:{
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                ContactsCommand contactsCommand = (ContactsCommand) lastCommand;
+                                try {
+                                    FileWriter out = new FileWriter(login + "Contacts.txt");
+                                    for (Contact contact : contactsCommand.getArrayList()) {
+                                        out.write(new StringBuilder(contact.getNick()).append(" ").append(contact.isFav()).append("\n").toString());
+                                    }
+                                    out.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+                        break;
+                    }
+                    case DISCONNECT_FROM_USER:{
+                        otherOne.disconnectFromUser();
+                        otherOne=null;
+                        break;
+                    }
+                    case CALL:{
+                        CallCommand callCommand = (CallCommand) lastCommand;
+                        if (Main.onlineUsers.containsKey(callCommand.getNick())){
+                            otherOne = Main.onlineUsers.get(callCommand.getNick());
+                            otherOne.sendCall(this);
+                        }
+                        else{
+                            connection.sendOffline();
+                        }
+                        break;
+                    }
+                    case ACCEPT:{
+                        otherOne.sendAccept();
+                    }
+                    case REJECT:{
+                        otherOne.sendReject();
+                        otherOne=null;
+                    }
+
                 }
 
             }
@@ -85,4 +166,29 @@ public class TalkingThread extends Thread {
             run=false;
         }
     }
+
+    public void sendCall(TalkingThread otherOne){
+        this.otherOne = otherOne;
+        connection.sendCall(this.otherOne.getLogin());
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void sendAccept(){
+        connection.accept();
+    }
+
+    public void sendReject(){
+        connection.reject();
+        otherOne = null;
+    }
+
+    public void disconnectFromUser(){
+        connection.disconnectFromUser();
+        otherOne = null;
+    }
+
+
 }
