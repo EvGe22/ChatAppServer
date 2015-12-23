@@ -10,7 +10,7 @@ public class ContactsCommand extends Command {
 
     public ContactsCommand(ArrayList<Contact> tmp){
         super(CommandType.CONTACTS);
-        arrayList=tmp;
+        arrayList = tmp;
     }
 
     public ArrayList<Contact> getArrayList() {

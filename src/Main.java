@@ -20,11 +20,15 @@ public class Main {
             System.out.println("1.Registered users\n2.Online users\n3.Shut down");
             switch (in.nextInt()){
                 case 1:{
-
+                    for (Map.Entry<String, String> entry : Main.logins.entrySet()){
+                        System.out.println(entry.getKey());
+                    }
                     break;
                 }
                 case 2:{
-
+                    for (Map.Entry<String, TalkingThread> entry : Main.onlineUsers.entrySet()){
+                        System.out.println(entry.getKey());
+                    }
                     break;
                 }
                 case 3:{

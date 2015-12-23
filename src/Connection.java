@@ -130,6 +130,24 @@ class Connection{
         lastCommand=CommandType.EMPTYMYCONTACTS;
     }
 
+    public void sendBusy() {
+        try {
+            out.write(new StringBuilder(Protocol.BUSY).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.BUSY;
+    }
+
+    public void sendOnlineContacts(String s) {
+        try {
+            out.write(new StringBuilder(Protocol.ONLINE_CONTACTS).append(s).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.ONLINE_CONTACTS;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return socket.equals(((Connection) obj).socket);
@@ -138,7 +156,6 @@ class Connection{
     public Command recieve(){
         return  Command.getCommand(in);
     }
-
 
 
 }

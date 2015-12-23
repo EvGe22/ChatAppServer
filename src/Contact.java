@@ -7,10 +7,12 @@ public class Contact {
 
     }
 
-    public Contact(String nick, boolean isFav) {
+    public Contact(String nick, String isFav) {
         this.nick = nick;
-        this.isFav = isFav;
+        this.isFav = Boolean.parseBoolean(isFav);
     }
+
+
 
     public String getNick() {
         return nick;
