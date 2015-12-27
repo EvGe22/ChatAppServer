@@ -39,7 +39,7 @@ public class Command {
             ArrayList<Contact> arrayList= new ArrayList<Contact>();
             String tmp = string.replace(Protocol.CONTACTS+" ","");
             String[] tmpArr = tmp.split(" ");
-
+            if (tmpArr.length<=1) return null;
             for (int i=0;i<tmpArr.length;i+=2) {
                 arrayList.add(new Contact(tmpArr[i],tmpArr[i+1]));
             }

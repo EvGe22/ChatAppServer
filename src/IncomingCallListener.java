@@ -25,6 +25,7 @@ public class IncomingCallListener {
         }
         connection.sendClientHello();
         lastCommand = connection.recieve();
+
         if (lastCommand.type==CommandType.HELLO_SERVER) return connection;
         else return null;
     }

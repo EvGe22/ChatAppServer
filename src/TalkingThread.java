@@ -1,7 +1,5 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -37,6 +35,7 @@ public class TalkingThread extends Thread {
                         }
                         else {
                             connection.reject();
+
                         }
                         break;
                     }
@@ -51,7 +50,7 @@ public class TalkingThread extends Thread {
                         Main.temporary.remove(this);
                         login = signUpCommand.getLogin();
                         Main.onlineUsers.put(login, this);
-                        System.out.println(login + " signed up");
+
 
                         break;
                     }
@@ -74,6 +73,7 @@ public class TalkingThread extends Thread {
                             otherOne = null;
                         }
                         login=null;
+                        connection.logOut();
                         break;
                     }
                     case GET_CONTACTS:{
@@ -86,9 +86,9 @@ public class TalkingThread extends Thread {
                                 {
                                     if (entry.getKey().toLowerCase().contains(command.getRegex().toLowerCase()) && !entry.getKey().equalsIgnoreCase(login)) stringBuilder.append(" ")
                                             .append(entry.getKey()).append(" ").append(Main.onlineUsers.containsKey(entry.getKey()));
-                                    System.out.println(entry.getKey()+" "+command.getRegex());
+
                                 }
-                                System.out.println(stringBuilder.toString()); //HEH
+
                                 if (!stringBuilder.toString().equals(""))
                                 connection.sendContacts(stringBuilder.toString());
                                 else connection.sendEmptyContacts();
@@ -110,6 +110,7 @@ public class TalkingThread extends Thread {
                                         stringBuilder.append(" ").append(tmp).append(" ").append(Main.onlineUsers.containsKey(tmpArr[0]));
                                     }
                                     connection.sendMyContacts(stringBuilder.toString());
+                                    in.close();
                                 } catch (FileNotFoundException e) {
                                     e.printStackTrace();
                                     connection.sendEmptyMyContacts();
@@ -122,7 +123,11 @@ public class TalkingThread extends Thread {
                                 try {
                                     ContactsCommand contactsCommand = (ContactsCommand) lastCommand;
                                     if (contactsCommand.getArrayList()==null) return;
-                                    FileWriter out = new FileWriter(login + "Contacts.txt");
+                                    File file = new File(login + "Contacts.txt");
+                                    System.out.println( Files.deleteIfExists(file.toPath()));
+                                    System.out.println(file.exists());
+                                    System.out.println(file.createNewFile());
+                                    FileWriter out = new FileWriter(file);
                                     for (Contact contact : contactsCommand.getArrayList()) {
                                         out.write(new StringBuilder(contact.getNick()).append(" ").append(contact.isFav()).append("\n").toString());
                                     }
@@ -134,13 +139,13 @@ public class TalkingThread extends Thread {
                         break;
                     }
                     case DISCONNECT_FROM_USER:{
-                        System.out.println("got Disconnect from");
+
                         otherOne.disconnectFromUser();
                         otherOne=null;
                         break;
                     }
                     case CALL:{
-                        System.out.println("got Call");
+
                         CallCommand callCommand = (CallCommand) lastCommand;
                         if (Main.onlineUsers.containsKey(callCommand.getNick())){
                             otherOne = Main.onlineUsers.get(callCommand.getNick());
@@ -162,7 +167,7 @@ public class TalkingThread extends Thread {
                         break;
                     }
                     case REJECT:{
-                        System.out.println("Got reject");
+
                         otherOne.sendReject();
                         isBusy=false;
                         otherOne=null;
@@ -173,7 +178,7 @@ public class TalkingThread extends Thread {
                         else {
 
                             otherOne.sendMessage(((MessageCommand) lastCommand).getMessage());
-                            System.out.println("got "+((MessageCommand) lastCommand).getMessage());
+
                         }
                         break;
                     }
@@ -206,7 +211,7 @@ public class TalkingThread extends Thread {
 
     private void sendMessage(String message) {
         connection.sendMessage(message);
-        System.out.println("sent "+message);
+
     }
 
     public boolean sendCall(TalkingThread otherOne){
@@ -225,13 +230,13 @@ public class TalkingThread extends Thread {
     }
 
     public void sendReject(){
-        System.out.println("sending reject");
+
         connection.reject();
         otherOne = null;
     }
 
     public void disconnectFromUser(){
-        System.out.println("sent Disconnect from");
+
         connection.disconnectFromUser();
         otherOne = null;
     }

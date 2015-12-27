@@ -148,6 +148,15 @@ class Connection{
         lastCommand=CommandType.ONLINE_CONTACTS;
     }
 
+    public void logOut() {
+        try {
+            out.write(new StringBuilder(Protocol.LOGOUT).append("\n").toString().getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        lastCommand=CommandType.LOGOUT;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return socket.equals(((Connection) obj).socket);
@@ -156,6 +165,5 @@ class Connection{
     public Command recieve(){
         return  Command.getCommand(in);
     }
-
 
 }

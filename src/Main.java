@@ -17,7 +17,7 @@ public class Main {
         listener.start();
         Scanner in = new Scanner(System.in);
         while (true) {
-            System.out.println("1.Registered users\n2.Online users\n3.Shut down");
+            System.out.println("1.Registered users\n2.Online users\n3.Temp amount\n4.Shut down");
             switch (in.nextInt()){
                 case 1:{
                     for (Map.Entry<String, String> entry : Main.logins.entrySet()){
@@ -31,9 +31,12 @@ public class Main {
                     }
                     break;
                 }
-                case 3:{
+                case 4:{
                     writeLoginsToFile();
                     return;
+                }
+                case 3:{
+                    System.out.println(temporary.size());
                 }
             }
         }
